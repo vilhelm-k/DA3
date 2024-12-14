@@ -12,22 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Required Libraries and Data Import
 
 ```{r}
-required_packages <- c(
-    "rio", "ggplot2", "vtable", "plot3D",
-    "corrplot", "regclass", "olsrr", "mediation", "multilevel", "stargazer"
-)
-
-for (i in 1:length(required_packages)) {
-    if (!required_packages[i] %in% installed.packages()) {
-        install.packages(required_packages[i])
-    }
-}
-
+# Load necessary libraries
 library(ggplot2)
 library(rio)
 library(mediation)
 
-# Import data
+# Import dataset
 df <- rio::import("BE603_gr_10.csv")
 ```
 
@@ -35,7 +25,7 @@ df <- rio::import("BE603_gr_10.csv")
 
 ### Models and Bootstrap
 
-```{r}
+```{r, results='asis'}
 model_T <- lm(collected_funds ~ updates_count, data = df)
 model_M <- lm(comments_count ~ updates_count, data = df)
 model_Y <- lm(collected_funds ~ updates_count + comments_count, data = df)
@@ -50,12 +40,10 @@ model_bootstrap <- mediation::mediate(
     boot = TRUE,
     sims = 2000
 )
+stargazer::stargazer(model_T, model_M, model_Y, type = "text")
 ```
 
 ### Visualization
-```{r,  results='asis'}
-stargazer::stargazer(model_T, model_M, model_Y, type = "text")
-```
 
 ```{r}
 plot(model_bootstrap)

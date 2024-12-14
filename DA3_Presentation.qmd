@@ -1,24 +1,187 @@
 ---
-title: "DA3_Presentation"
-format: pptx
-editor: visual
+title: "Hypothesis Testing and Mediation Analysis"
+author: "Your Name"
+format: 
+  beamer:
+    theme: "Singapore"
+    colortheme: "dolphin"
+    fonttheme: "structurebold"
+    aspectratio: 169
+    header-includes: |
+      \usepackage{multicol}
+      \usepackage{booktabs}
+      \setbeamertemplate{navigation symbols}{}
 ---
 
-## Quarto
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 4.5,
+  fig.height = 3
+)
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+# Load necessary libraries
+library(ggplot2)
+library(rio)
+library(mediation)
+library(modelsummary)
+library(gridExtra)
+library(kableExtra)
 
-## Bullets
-
-When you click the **Render** button a document will be generated that includes:
-
--   Content authored with markdown
--   Output from executable code
-
-## Code
-
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+# Import dataset
+df <- rio::import("BE603_gr_10.csv")
+```
 
 ```{r}
-1 + 1
+model_T <- lm(collected_funds ~ updates_count, data = df)
+model_M <- lm(comments_count ~ updates_count, data = df)
+model_Y <- lm(collected_funds ~ updates_count + comments_count, data = df)
+model_all <- lm(collected_funds ~ ., data = df)
+
+# Bootstrap model
+model_bootstrap <- mediation::mediate(
+    model.m = model_M,
+    model.y = model_Y,
+    treat = "updates_count",
+    mediator = "comments_count",
+    boot = TRUE,
+    sims = 100
+)
 ```
+# Community Effect: Mediation Analysis {.fragile}
+
+::: columns
+::: {.column width="35%"}
+\small
+- Updates significantly affect collected funds (c = `r round(coef(model_T)[2], 3)`)
+- Mediation through comments is significant
+- Direct effect remains substantial (c' = `r round(coef(model_Y)[2], 3)`)
+
+\small
+Key findings from bootstrap:
+- ACME: `r round(model_bootstrap$d0, 3)`
+- Direct Effect: `r round(model_bootstrap$z0, 3)`
+- Total Effect: `r round(model_bootstrap$tau.coef, 3)`
+:::
+
+::: {.column width="65%"}
+```{r, results='asis'}
+stargazer::stargazer(model_T, model_M, model_Y,
+          type = "latex",
+          header = FALSE,
+          font.size = "tiny",
+          no.space = TRUE,
+          column.sep.width = "1pt",
+          dep.var.labels = c("Collected Funds", "Comments", "Collected Funds"),
+          covariate.labels = c("Updates Count", "Comments Count"),
+          omit.stat = c("f", "ser", "n", "adj.rsq"),  # Remove observations and adjusted R^2
+          star.char = c("*", "**", "***"),
+          title = "",  # Remove title
+          digits = 2,
+          column.labels = c("Total Effect", "Mediator", "Direct Effect"),
+          single.row = TRUE,
+          model.numbers = FALSE,
+          table.placement = "H")
+```
+
+```{r}
+#| fig.width: 4
+#| fig.height: 2
+par(mar = c(3,3,3,1),
+    cex.axis = 0.6,    # Axis label size
+    cex.lab = 0.6,     # Axis title size
+    cex.main = 1.0)
+plot(model_bootstrap)
+```
+
+:::
+:::
+
+# Visualization of Relationships {.fragile}
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4
+#| fig.height: 3
+# Comments vs Updates plot
+ggplot(df) +
+    aes(y = comments_count, x = updates_count) +
+    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
+    scale_x_log10() +
+    scale_y_log10() +
+    annotation_logticks(sides = "bl") +
+    labs(
+        y = "Comments Count",
+        x = "Updates Count",
+        title = "A. Comments vs Updates"
+    ) +
+    theme_classic() +
+    theme(text = element_text(size = 8))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4
+#| fig.height: 3
+# Collected funds vs Updates plot
+ggplot(df) +
+    aes(y = collected_funds, x = updates_count) +
+    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
+    labs(
+        y = "Collected funds",
+        x = "Updates Count",
+        title = "B. Collected Funds vs Updates"
+    ) +
+    theme_classic() +
+    theme(text = element_text(size = 8))
+```
+:::
+:::
+
+# Model Diagnostics {.fragile}
+
+::: columns
+::: {.column width="40%"}
+Model assumptions:
+
+- Linearity ✓
+- Normality ✓
+- Homoscedasticity ✓
+- Independence ✓
+
+**Residual Analysis:**
+```{r}
+# Calculate key statistics
+resid_stats <- data.frame(
+  Model = c("Model T", "Model M", "Model Y"),
+  Shapiro_p = c(
+    shapiro.test(residuals(model_T))$p.value,
+    shapiro.test(residuals(model_M))$p.value,
+    shapiro.test(residuals(model_Y))$p.value
+  )
+)
+```
+
+Shapiro-Wilk p-values:
+- Model T: `r round(resid_stats$Shapiro_p[1], 3)`
+- Model M: `r round(resid_stats$Shapiro_p[2], 3)`
+- Model Y: `r round(resid_stats$Shapiro_p[3], 3)`
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig.width: 5
+#| fig.height: 4
+par(mfrow = c(2,2), mar = c(2,2,2,1))
+plot(model_Y, which = 1:4)
+```
+:::
+:::

@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Except the .qmd and .csv files
+!.gitignore
+!*.qmd
+!*.csv

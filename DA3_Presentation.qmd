@@ -9,6 +9,7 @@ format:
     aspectratio: 169
     header-includes: |
       \usepackage{multicol}
+      \usepackage{booktabs}
       \setbeamertemplate{navigation symbols}{}
 ---
 
@@ -27,11 +28,13 @@ library(rio)
 library(mediation)
 library(modelsummary)
 library(gridExtra)
+library(kableExtra)
 
 # Import dataset
 df <- rio::import("BE603_gr_10.csv")
+```
 
-# Generate all models
+```{r}
 model_T <- lm(collected_funds ~ updates_count, data = df)
 model_M <- lm(comments_count ~ updates_count, data = df)
 model_Y <- lm(collected_funds ~ updates_count + comments_count, data = df)
@@ -44,45 +47,55 @@ model_bootstrap <- mediation::mediate(
     treat = "updates_count",
     mediator = "comments_count",
     boot = TRUE,
-    sims = 2000
+    sims = 100
 )
 ```
-
 # Community Effect: Mediation Analysis {.fragile}
 
 ::: columns
-::: {.column width="45%"}
+::: {.column width="35%"}
+\small
 - Updates significantly affect collected funds (c = `r round(coef(model_T)[2], 3)`)
 - Mediation through comments is significant
 - Direct effect remains substantial (c' = `r round(coef(model_Y)[2], 3)`)
 
+\small
 Key findings from bootstrap:
 - ACME: `r round(model_bootstrap$d0, 3)`
 - Direct Effect: `r round(model_bootstrap$z0, 3)`
 - Total Effect: `r round(model_bootstrap$tau.coef, 3)`
 :::
 
-::: {.column width="55%"}
-```{r}
-#| fig.width: 3
-#| fig.height: 2
-par(mar = c(2,2,1,1))
-plot(model_bootstrap)
+::: {.column width="65%"}
+```{r, results='asis'}
+stargazer::stargazer(model_T, model_M, model_Y,
+          type = "latex",
+          header = FALSE,
+          font.size = "tiny",
+          no.space = TRUE,
+          column.sep.width = "1pt",
+          dep.var.labels = c("Collected Funds", "Comments", "Collected Funds"),
+          covariate.labels = c("Updates Count", "Comments Count"),
+          omit.stat = c("f", "ser", "n", "adj.rsq"),  # Remove observations and adjusted R^2
+          star.char = c("*", "**", "***"),
+          title = "",  # Remove title
+          digits = 2,
+          column.labels = c("Total Effect", "Mediator", "Direct Effect"),
+          single.row = TRUE,
+          model.numbers = FALSE,
+          table.placement = "H")
 ```
 
 ```{r}
-modelsummary(list("Total Effect" = model_T,
-                  "Mediator" = model_M,
-                  "Direct Effect" = model_Y),
-             stars = TRUE,
-             gof_map = c("nobs", "r.squared"),
-             fmt = 2,
-             estimate = "{estimate}{stars}",
-             statistic = NULL,
-             title = "Mediation Analysis Results",
-             fontsize = "tiny",
-             latex_options = c("scale_down"))
+#| fig.width: 4
+#| fig.height: 2
+par(mar = c(3,3,3,1),
+    cex.axis = 0.6,    # Axis label size
+    cex.lab = 0.6,     # Axis title size
+    cex.main = 1.0)
+plot(model_bootstrap)
 ```
+
 :::
 :::
 

@@ -1,16 +1,21 @@
 ---
 title: "Hypothesis Testing and Mediation Analysis"
-author: "Your Name"
+author: "Vilhelm Karlin - 26012, Wilhelm Vänje - xxxxx, Pelle Alvemo - xxxxx"
 format: 
   beamer:
-    theme: "Singapore"
-    colortheme: "dolphin"
-    fonttheme: "structurebold"
+    theme: "metropolis"
+    fonttheme: professionalfonts
     aspectratio: 169
+    fontsize: 10pt
     header-includes: |
       \usepackage{multicol}
       \usepackage{booktabs}
       \setbeamertemplate{navigation symbols}{}
+      \setbeamertemplate{footline}[frame number]
+
+      \setbeamercolor{block title}{bg=gray!20, fg=black} % Background color for block titles
+      \setbeamercolor{block body}{bg=gray!8, fg=black}   % Background color for block body
+      \setbeamerfont{block title}{series=\bfseries, size=\small} % Block title font
 ---
 
 ```{r setup, include=FALSE}
@@ -34,6 +39,83 @@ library(kableExtra)
 df <- rio::import("BE603_gr_10.csv")
 ```
 
+# Hypothesis 1: SLR
+
+::: columns
+::: {.column width="50%"}
+## Variable identification
+\small
+- **Dependent variable (DV):** collected funds
+- **Independent variable (IV):** goal
+
+## Hypothesis statement
+\small
+- $H_0: \rho \leq 0$ There is no positive correlation between the goal and collected funds
+- $H_1: \rho > 0$ There exists a positive correlation between the goal and collected funds
+
+:::
+
+::: {.column width="50%"}
+## Theoretical justification
+\scriptsize
+The goal amount serves as an psychological factor for potential investors. Further, the IV goal, according to the signaling theory, acts as a signal of the campaigns scope and ambitious. High but realistic goals also indicates on well-thought through projects. Furthermore, higher goals usually requires more investors, creating “social proof” effect. Hence, increased numbers of investors will cause the campaign to create and gain momentum, attracting additional investors. However, studies on crowdfunding, highlights positive correlation between goal and collected funds  (belleflamme et al., 2014). 
+
+## Empirical model
+\small
+$$
+\text{Collected funds}=\beta_0 + \beta_1 \text{Goal} + \epsilon
+$$
+where $\epsilon$ is the normally distributed residual.
+:::
+:::
+
+# Hypothesis 1: Results and analysis
+
+```{r, results='asis'}
+#| layout: [[1,1]]
+
+model_H1 <- lm(collected_funds ~ goal, data = df)
+
+stargazer::stargazer(model_H1,
+  type = "latex",
+  header = FALSE,
+  font.size = "scriptsize",
+  column.sep.width = "1pt",
+  dep.var.labels = c("Collected Funds"),
+  covariate.labels = c("$\\beta_1$ (Goal)", "$\\beta_0$ (Constant)"),
+  omit.stat = c("ser", "f", "n"), 
+  keep.stat = c("rsq"),
+  star.char = c("*", "**", "***"),
+  float = FALSE,
+  no.space = TRUE,
+  single.row = TRUE,
+  model.numbers = FALSE,
+  notes = "",
+  add.lines = list(c("")),
+  table.placement = "H")
+
+ggplot(df) +
+  aes(y = collected_funds, x = goal) +
+  geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
+  labs(
+    y = "Collected funds",
+    x = "Goal",
+    title = "Correlation between goal and collected funds"
+  ) +
+  theme_classic() +
+  theme(
+    panel.background = element_rect(fill = "transparent"),
+    plot.background = element_rect(fill = "transparent", color = NA)
+  )
+```
+
+## Analysis 
+\tiny The simple linear regression reveals a significant positive relationship between campaign goals and collected funds ($\beta_1 > 0$, $p < 0.001$). For every unit increase in the goal amount, there is a corresponding increase of `r round(coef(model_H1)[2], 3)` units in collected funds, with a baseline of `r round(coef(model_H1)[1], 0)` units ($\beta_0$). The model explains `r round(summary(model_H1)$r.squared * 100, 1)`% of the variance in collected funds ($R^2 = `r round(summary(model_H1)$r.squared, 3)`$), indicating a moderate fit. These results support rejecting $H_0$ in favor of $H_1$, confirming our theoretical expectation that higher goals are associated with higher funding outcomes.
+
+# Community Effect: Mediation Analysis
+
 ```{r}
 model_T <- lm(collected_funds ~ updates_count, data = df)
 model_M <- lm(comments_count ~ updates_count, data = df)
@@ -50,7 +132,6 @@ model_bootstrap <- mediation::mediate(
     sims = 100
 )
 ```
-# Community Effect: Mediation Analysis {.fragile}
 
 ::: columns
 ::: {.column width="35%"}

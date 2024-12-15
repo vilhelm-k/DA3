@@ -38,7 +38,7 @@ model_bootstrap <- mediation::mediate(
     treat = "updates_count",
     mediator = "comments_count",
     boot = TRUE,
-    sims = 2000
+    sims = 100
 )
 stargazer::stargazer(model_T, model_M, model_Y, type = "text")
 ```
@@ -170,4 +170,12 @@ ggplot(data.frame(residuals = residuals_H3)) +
     geom_histogram(binwidth = 1000, fill = "blue", alpha = 0.7, color = "black") +
     labs(title = "Residuals of Model_T", x = "Residuals", y = "Frequency") +
     theme_classic()
+```
+
+```{r}
+library(modelsummary)
+library(broom)
+library(dplyr)
+knitr::kable(model_H3)
+
 ```

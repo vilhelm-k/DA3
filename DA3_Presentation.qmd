@@ -75,6 +75,8 @@ model_H1 <- lm(collected_funds ~ goal, data = df)
 ::: {.column width="50%"}
 ## Analysis and interpretation
 This is an analysis block with white text and a custom font size.
+
+We find that $R^2 = `r round(summary(model_H1)$r.squared, 3)`$
 :::
 
 
@@ -98,14 +100,13 @@ knitr::kable(summary(model_H1)$coefficients,
 
 ggplot(df) +
     aes(y = collected_funds, x = goal) +
-    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
     geom_point(alpha = 0.5) +
     geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
     labs(
         y = "Collected funds (USD)",
         x = "Goal (USD)"
     ) +
-    theme_classic() +
+    theme_minimal() +
     theme(
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)
@@ -192,7 +193,6 @@ plot(model_bootstrap)
 # Comments vs Updates plot
 ggplot(df) +
     aes(y = comments_count, x = updates_count) +
-    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
     geom_point(alpha = 0.5) +
     geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
     scale_x_log10() +
@@ -215,7 +215,6 @@ ggplot(df) +
 # Collected funds vs Updates plot
 ggplot(df) +
     aes(y = collected_funds, x = updates_count) +
-    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
     geom_point(alpha = 0.5) +
     geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
     labs(

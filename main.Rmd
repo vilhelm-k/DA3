@@ -28,9 +28,7 @@ df <- rio::import("BE603_gr_10.csv")
 ```{r, results='asis'}
 model_T <- lm(collected_funds ~ updates_count, data = df)
 model_M <- lm(comments_count ~ updates_count, data = df)
-model_Y <- lm(collected_funds ~ updates_count + comments_count, data = df)
-model_all <- lm(collected_funds ~ ., data = df)
-
+model_Y <- lm(collected_funds ~ updates_count + comments_count + pitch_size + campaign_quality + images, data = df)
 
 model_bootstrap <- mediation::mediate(
     model.m = model_M,
@@ -38,7 +36,7 @@ model_bootstrap <- mediation::mediate(
     treat = "updates_count",
     mediator = "comments_count",
     boot = TRUE,
-    sims = 100
+    sims = 500
 )
 stargazer::stargazer(model_T, model_M, model_Y, type = "text")
 ```
@@ -55,9 +53,6 @@ ggplot(df) +
     geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
     geom_point(alpha = 0.5) +
     geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
-    scale_x_log10() +
-    scale_y_log10() +
-    annotation_logticks(sides = "bl") +
     labs(
         y = "Comments Count",
         x = "Updates Count"
@@ -110,7 +105,7 @@ ggplot(data.frame(residuals = residuals_Y)) +
 
 ```{r, results='asis'}
 model_H2 <- lm(collected_funds ~ social * negemo, data = df)
-stargazer::stargazer(model_H2, type = "text")
+summary(model_H2)
 ```
 
 ### Visualization
@@ -136,7 +131,7 @@ residuals_H2 <- residuals(model_H2)
 ggplot(data.frame(residuals = residuals_H2)) +
     aes(x = residuals) +
     geom_histogram(binwidth = 1000, fill = "blue", alpha = 0.7, color = "black") +
-    labs(title = "Residuals of Model_T", x = "Residuals", y = "Frequency") +
+    labs(title = "Residuals of Model_H2", x = "Residuals", y = "Frequency") +
     theme_classic()
 ```
 
@@ -168,14 +163,46 @@ residuals_H3 <- residuals(model_H3)
 ggplot(data.frame(residuals = residuals_H3)) +
     aes(x = residuals) +
     geom_histogram(binwidth = 1000, fill = "blue", alpha = 0.7, color = "black") +
-    labs(title = "Residuals of Model_T", x = "Residuals", y = "Frequency") +
+    labs(title = "Residuals of Model_H3", x = "Residuals", y = "Frequency") +
     theme_classic()
 ```
 
-```{r}
+```{r, results='asis'}
 library(modelsummary)
 library(broom)
 library(dplyr)
-knitr::kable(model_H3)
-
+summary(model_H3)
 ```
+```{r}
+library(corrplot)
+cor_matrix <- cor(df[sapply(df, is.numeric)], use = "complete.obs")
+corrplot(cor_matrix,
+    method = "color", type = "upper",
+    tl.col = "black", tl.srt = 45, 
+    addCoef.col = "black", number.cex = 0.7 
+)
+```
+
+```{r}
+# Cook's distance for model_T
+plot(cooks.distance(model_T), type = "h", main = "Cook's Distance for Model T")
+abline(h = 4 / nrow(df), col = "red", lty = 2)
+
+# Cook's distance for model_M
+plot(cooks.distance(model_M), type = "h", main = "Cook's Distance for Model M")
+abline(h = 4 / nrow(df), col = "red", lty = 2)
+
+# Cook's distance for model_Y
+plot(cooks.distance(model_Y), type = "h", main = "Cook's Distance for Model Y")
+abline(h = 4 / nrow(df), col = "red", lty = 2)
+
+# Cook's distance for model_H2
+plot(cooks.distance(model_H2), type = "h", main = "Cook's Distance for Model H2")
+abline(h = 4 / nrow(df), col = "red", lty = 2)
+
+# Cook's distance for model_H3
+plot(cooks.distance(model_H3), type = "h", main = "Cook's Distance for Model H3")
+abline(h = 4 / nrow(df), col = "red", lty = 2)
+```
+
+

@@ -14,9 +14,9 @@ format:
       \setbeamertemplate{navigation symbols}{}
       \setbeamertemplate{footline}[frame number]
 
-      \setbeamercolor{block title}{bg=gray!20, fg=black} % Background color for block titles
-      \setbeamercolor{block body}{bg=gray!8, fg=black}   % Background color for block body
-      \setbeamerfont{block title}{series=\bfseries, size=\normalsize} % Block title font
+      \setbeamercolor{block title}{bg=gray!20, fg=black} 
+      \setbeamercolor{block body}{bg=gray!8, fg=black}   
+      \setbeamerfont{block title}{series=\bfseries, size=\normalsize} 
 ---
 
 ```{r setup, include=FALSE}
@@ -28,7 +28,6 @@ knitr::opts_chunk$set(
   fig.height = 3
 )
 
-# Load necessary libraries
 library(ggplot2)
 library(rio)
 library(mediation)
@@ -36,7 +35,6 @@ library(modelsummary)
 library(gridExtra)
 library(kableExtra)
 
-# Import dataset
 df <- rio::import("BE603_gr_10.csv")
 ```
 
@@ -52,6 +50,10 @@ df <- rio::import("BE603_gr_10.csv")
 - $H_0: \rho \leq 0$ There is no positive correlation between the goal and collected funds
 - $H_1: \rho > 0$ There exists a positive correlation between the goal and collected funds
 
+```{mermaid}
+flowchart LR
+  A[Goal] --> B[Collected funds]
+```
 :::
 
 ::: {.column width="60%"}
@@ -174,8 +176,8 @@ stargazer::stargazer(model_T, model_M, model_Y,
 #| fig.width: 4
 #| fig.height: 2
 par(mar = c(3,3,3,1),
-    cex.axis = 0.6,    # Axis label size
-    cex.lab = 0.6,     # Axis title size
+    cex.axis = 0.6,    
+    cex.lab = 0.6,    
     cex.main = 1.0)
 plot(model_bootstrap)
 ```

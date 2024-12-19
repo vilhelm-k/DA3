@@ -38,17 +38,19 @@ library(kableExtra)
 df <- rio::import("BE603_gr_10.csv")
 ```
 
-# Hypothesis 1: SLR 
+# Hypothesis 1: SLR
 
 ::: columns
 ::: {.column width="40%"}
 ## Variable identification
-- **Dependent variable (DV):** collected funds
-- **Independent variable (IV):** goal
+
+-   **Dependent variable (DV):** collected funds
+-   **Independent variable (IV):** goal
 
 ## Hypothesis statement
-- $H_0: \rho \leq 0$ There is no positive correlation between the goal and collected funds
-- $H_1: \rho > 0$ There exists a positive correlation between the goal and collected funds
+
+-   $H_0: \rho \leq 0$ There is no positive correlation between the goal and collected funds
+-   $H_1: \rho > 0$ There exists a positive correlation between the goal and collected funds
 
 ```{mermaid}
 flowchart LR
@@ -58,10 +60,12 @@ flowchart LR
 
 ::: {.column width="60%"}
 ## Theoretical justification
-The goal amount serves as an psychological factor for potential investors. Further, the IV goal, according to the signaling theory, acts as a signal of the campaigns scope and ambitious. High but realistic goals also indicates on well-thought through projects. Furthermore, higher goals usually requires more investors, creating “social proof” effect. Hence, increased numbers of investors will cause the campaign to create and gain momentum, attracting additional investors. However, studies on crowdfunding, highlights positive correlation between goal and collected funds  (belleflamme et al., 2014). 
+
+The goal amount serves as an psychological factor for potential investors. Further, the IV goal, according to the signaling theory, acts as a signal of the campaigns scope and ambitious. High but realistic goals also indicates on well-thought through projects. Furthermore, higher goals usually requires more investors, creating “social proof” effect. Hence, increased numbers of investors will cause the campaign to create and gain momentum, attracting additional investors. However, studies on crowdfunding, highlights positive correlation between goal and collected funds (belleflamme et al., 2014).
 
 ## Empirical model
-$y=\beta_0 + \beta_1 x_1 + \epsilon$, 
+
+$y=\beta_0 + \beta_1 x_1 + \epsilon$,
 
 \noindent where $y$ is collected funds, $x_1$ is goal, $\beta_0, \, \beta_1$ our regression model constants, and $\epsilon$ is the normally distributed residual.
 :::
@@ -76,11 +80,11 @@ model_H1 <- lm(collected_funds ~ goal, data = df)
 ::: columns
 ::: {.column width="50%"}
 ## Analysis and interpretation
+
 This is an analysis block with white text and a custom font size.
 
-We find that $R^2 = `r round(summary(model_H1)$r.squared, 3)`$
+We find that $R^2 = `r round(summary(model_H1)$r.squared, 3)\`\$
 :::
-
 
 ::: {.column width="50%"}
 ```{r}
@@ -95,6 +99,7 @@ knitr::kable(summary(model_H1)$coefficients,
        digits = 3) %>%
   kableExtra::kable_styling(font_size = 6)
 ```
+
 ```{r}
 #| fig-cap: "Relationship between Collected Funds and Goal"
 #| fig-width: 6
@@ -118,7 +123,6 @@ ggplot(df) +
 :::
 :::
 
-
 # Community Effect: Mediation Analysis
 
 ```{r}
@@ -141,15 +145,14 @@ model_bootstrap <- mediation::mediate(
 ::: columns
 ::: {.column width="35%"}
 \small
-- Updates significantly affect collected funds (c = `r round(coef(model_T)[2], 3)`)
-- Mediation through comments is significant
-- Direct effect remains substantial (c' = `r round(coef(model_Y)[2], 3)`)
+
+-   Updates significantly affect collected funds (c = `r round(coef(model_T)[2], 3)`)
+-   Mediation through comments is significant
+-   Direct effect remains substantial (c' = `r round(coef(model_Y)[2], 3)`)
 
 \small
-Key findings from bootstrap:
-- ACME: `r round(model_bootstrap$d0, 3)`
-- Direct Effect: `r round(model_bootstrap$z0, 3)`
-- Total Effect: `r round(model_bootstrap$tau.coef, 3)`
+
+Key findings from bootstrap: - ACME: `r round(model_bootstrap$d0, 3)` - Direct Effect: `r round(model_bootstrap$z0, 3)` - Total Effect: `r round(model_bootstrap$tau.coef, 3)`
 :::
 
 ::: {.column width="65%"}
@@ -181,7 +184,6 @@ par(mar = c(3,3,3,1),
     cex.main = 1.0)
 plot(model_bootstrap)
 ```
-
 :::
 :::
 
@@ -236,12 +238,13 @@ ggplot(df) +
 ::: {.column width="40%"}
 Model assumptions:
 
-- Linearity ✓
-- Normality ✓
-- Homoscedasticity ✓
-- Independence ✓
+-   Linearity ✓
+-   Normality ✓
+-   Homoscedasticity ✓
+-   Independence ✓
 
 **Residual Analysis:**
+
 ```{r}
 # Calculate key statistics
 resid_stats <- data.frame(
@@ -254,10 +257,7 @@ resid_stats <- data.frame(
 )
 ```
 
-Shapiro-Wilk p-values:
-- Model T: `r round(resid_stats$Shapiro_p[1], 3)`
-- Model M: `r round(resid_stats$Shapiro_p[2], 3)`
-- Model Y: `r round(resid_stats$Shapiro_p[3], 3)`
+Shapiro-Wilk p-values: - Model T: `r round(resid_stats$Shapiro_p[1], 3)` - Model M: `r round(resid_stats$Shapiro_p[2], 3)` - Model Y: `r round(resid_stats$Shapiro_p[3], 3)`
 :::
 
 ::: {.column width="60%"}

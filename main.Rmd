@@ -146,7 +146,7 @@ png("figures/assumption_plots.png",
     width = 10,
     height = 12,
     units = "in",
-    res = 1200
+    res = 400
 )
 par(mfrow = c(5, 3), mar = c(4, 4, 3, 1), mgp = c(2.5, 0.8, 0))
 

@@ -139,8 +139,16 @@ corrplot(cor_matrix,
 )
 ```
 
-```{r, fig.width=12, fig.height=6}
-par(mfrow = c(2, 5), mar = c(2, 2, 2, 1))
+```{r, fig.width=13, fig.height=12}
+dir.create("figures", showWarnings = FALSE)
+
+png("figures/assumption_plots.png",
+    width = 13,
+    height = 12,
+    units = "in",
+    res = 1200
+)
+par(mfrow = c(5, 3), mar = c(2, 2, 2, 1))
 
 plot_residuals <- function(model, title) {
     hist(residuals(model),
@@ -154,26 +162,60 @@ plot_residuals <- function(model, title) {
     lines(density(residuals(model)), col = "blue", lwd = 2)
 }
 
-plot_residuals(model_H2, "Hypothesis 1: Model Residuals")
-plot_residuals(model_T, "Hypothesis 2: Model T Residuals")
-plot_residuals(model_M, "Hypothesis 2: Model M Residuals")
-plot_residuals(model_Y, "Hypothesis 2: Model Y Residuals")
-plot_residuals(model_H3, "Hypothesis 3: Model Residuals")
+plot_abs_residuals <- function(model, title, x) {
+    plot(x, abs(model$residuals),
+        main = title,
+        ylab = "Absolute Residuals",
+        xlab = "X",
+        type = "n",
+        col = "lightgray",
+        border = "white"
+    )
+    abline(h = 0, col = "black")
+    points(x, abs(model$residuals), pch = 4, col = "black")
+}
 
-plot(cooks.distance(model_H2), type = "h", main = "Hypothesis 1: Cook's Distance", xlab = "", ylab = "")
-abline(h = 4 / nrow(df), col = "red", lty = 2)
+plot_cooks <- function(model, title) {
+    plot(cooks.distance(model),
+        type = "h",
+        main = title,
+        xlab = "",
+        ylab = "Cook's Distance"
+    )
+    abline(h = 4 / nrow(df), col = "red", lty = 2)
+}
 
-plot(cooks.distance(model_T), type = "h", main = "Hypothesis 2: T Cook's Distance", xlab = "", ylab = "")
-abline(h = 4 / nrow(df), col = "red", lty = 2)
+# Row 1: H1
+plot_residuals(model_H3, "H1: Residuals")
+plot_abs_residuals(model_H3, "H1: Abs Residuals", df$goal)
+plot_cooks(model_H3, "H1: Cook's Distance")
 
-plot(cooks.distance(model_M), type = "h", main = "Hypothesis 2: M Cook's Distance", xlab = "", ylab = "")
-abline(h = 4 / nrow(df), col = "red", lty = 2)
 
-plot(cooks.distance(model_Y), type = "h", main = "Hypothesis 2: Y Cook's Distance", xlab = "", ylab = "")
-abline(h = 4 / nrow(df), col = "red", lty = 2)
+# Row 2: H2 (T)
+plot_residuals(model_T, "H2-T: Residuals")
+plot_abs_residuals(model_T, "H2-T: Abs Residuals", df$updates_count)
+plot_cooks(model_T, "H2-T: Cook's Distance")
 
-plot(cooks.distance(model_H3), type = "h", main = "Hypothesis 3: Cook's Distance", xlab = "", ylab = "")
-abline(h = 4 / nrow(df), col = "red", lty = 2)
+# Row 3: H2 (M)
+plot_residuals(model_M, "H2-M: Residuals")
+plot_abs_residuals(model_M, "H2-M: Abs Residuals", df$updates_count)
+plot_cooks(model_M, "H2-M: Cook's Distance")
+
+# Row 4: H2 (Y)
+plot_residuals(model_Y, "H2-Y: Residuals")
+plot_abs_residuals(model_Y, "H2-Y: Abs Residuals", df$updates_count)
+plot_cooks(model_Y, "H2-Y: Cook's Distance")
+
+# Row 5: H3
+plot_residuals(model_H2, "H3: Residuals")
+plot_abs_residuals(model_H2, "H3: Abs Residuals", df$negemo)
+plot_cooks(model_H2, "H3: Cook's Distance")
 
 par(mfrow = c(1, 1))
+dev.off()
+```
+
+```{r}
+regclass::VIF(model_Y)
+regclass::VIF(model_H2)
 ```

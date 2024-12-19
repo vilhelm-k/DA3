@@ -143,30 +143,30 @@ corrplot(cor_matrix,
 dir.create("figures", showWarnings = FALSE)
 
 png("figures/assumption_plots.png",
-    width = 13,
+    width = 10,
     height = 12,
     units = "in",
     res = 1200
 )
-par(mfrow = c(5, 3), mar = c(2, 2, 2, 1))
+par(mfrow = c(5, 3), mar = c(4, 4, 3, 1), mgp = c(2.5, 0.8, 0))
 
-plot_residuals <- function(model, title) {
+plot_residuals <- function(model, title, xlabel) {
     hist(residuals(model),
         breaks = 100,
         probability = TRUE,
         main = title,
-        xlab = "Residuals",
+        xlab = xlabel,
         col = "lightgray",
         border = "white"
     )
     lines(density(residuals(model)), col = "blue", lwd = 2)
 }
 
-plot_abs_residuals <- function(model, title, x) {
+plot_abs_residuals <- function(model, title, x, xlabel) {
     plot(x, abs(model$residuals),
         main = title,
         ylab = "Absolute Residuals",
-        xlab = "X",
+        xlab = xlabel,
         type = "n",
         col = "lightgray",
         border = "white"
@@ -186,29 +186,29 @@ plot_cooks <- function(model, title) {
 }
 
 # Row 1: H1
-plot_residuals(model_H3, "H1: Residuals")
-plot_abs_residuals(model_H3, "H1: Abs Residuals", df$goal)
+plot_residuals(model_H3, "H1: Residuals", "Goal")
+plot_abs_residuals(model_H3, "H1: Abs Residuals", df$goal, "Goal")
 plot_cooks(model_H3, "H1: Cook's Distance")
 
 
 # Row 2: H2 (T)
-plot_residuals(model_T, "H2-T: Residuals")
-plot_abs_residuals(model_T, "H2-T: Abs Residuals", df$updates_count)
+plot_residuals(model_T, "H2-T: Residuals", "Updates Count")
+plot_abs_residuals(model_T, "H2-T: Abs Residuals", df$updates_count, "Updates Count")
 plot_cooks(model_T, "H2-T: Cook's Distance")
 
 # Row 3: H2 (M)
-plot_residuals(model_M, "H2-M: Residuals")
-plot_abs_residuals(model_M, "H2-M: Abs Residuals", df$updates_count)
+plot_residuals(model_M, "H2-M: Residuals", "Updates Count")
+plot_abs_residuals(model_M, "H2-M: Abs Residuals", df$updates_count, "Updates Count")
 plot_cooks(model_M, "H2-M: Cook's Distance")
 
 # Row 4: H2 (Y)
-plot_residuals(model_Y, "H2-Y: Residuals")
-plot_abs_residuals(model_Y, "H2-Y: Abs Residuals", df$updates_count)
+plot_residuals(model_Y, "H2-Y: Residuals", "Updates Count")
+plot_abs_residuals(model_Y, "H2-Y: Abs Residuals", df$updates_count, "Updates Count")
 plot_cooks(model_Y, "H2-Y: Cook's Distance")
 
 # Row 5: H3
-plot_residuals(model_H2, "H3: Residuals")
-plot_abs_residuals(model_H2, "H3: Abs Residuals", df$negemo)
+plot_residuals(model_H2, "H3: Residuals", "Negemo")
+plot_abs_residuals(model_H2, "H3: Abs Residuals", df$negemo, "Negemo")
 plot_cooks(model_H2, "H3: Cook's Distance")
 
 par(mfrow = c(1, 1))

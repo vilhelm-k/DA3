@@ -39,6 +39,56 @@ model_bootstrap <- mediation::mediate(
 stargazer::stargazer(model_T, model_M, model_Y, type = "text")
 ```
 
+```{r}
+library(plotly)
+
+mean_pitch_size <- mean(df$pitch_size, na.rm = TRUE)
+mean_campaign_quality <- mean(df$campaign_quality, na.rm = TRUE)
+mean_images <- mean(df$images, na.rm = TRUE)
+
+updates_seq <- seq(min(df$updates_count, na.rm = TRUE),
+    max(df$updates_count, na.rm = TRUE),
+    length.out = 30
+)
+
+comments_seq <- seq(min(df$comments_count, na.rm = TRUE),
+    max(df$comments_count, na.rm = TRUE),
+    length.out = 30
+)
+
+grid <- expand.grid(updates_count = updates_seq, comments_count = comments_seq)
+grid$pitch_size <- mean_pitch_size
+grid$campaign_quality <- mean_campaign_quality
+grid$images <- mean_images
+
+grid$collected_funds <- predict(model_Y, newdata = grid)
+
+plot_ly(
+    data = df,
+    x = ~updates_count,
+    y = ~comments_count,
+    z = ~collected_funds,
+    type = "scatter3d",
+    mode = "markers",
+    marker = list(size = 3, color = ~comments_count, colorscale = "Viridis")
+) %>%
+    add_trace(
+        x = grid$updates_count,
+        y = grid$comments_count,
+        z = grid$collected_funds,
+        type = "mesh3d",
+        opacity = 0.5,
+        color = "blue"
+    ) %>%
+    layout(
+        scene = list(
+            xaxis = list(title = "Updates Count"),
+            yaxis = list(title = "Comments Count"),
+            zaxis = list(title = "Collected Funds ($)")
+        )
+    )
+```
+
 ### Visualization
 
 ```{r}
@@ -48,32 +98,6 @@ plot(model_bootstrap)
 summary(model_bootstrap)
 ```
 
-
-```{r}
-ggplot(df) +
-    aes(y = comments_count, x = updates_count) +
-    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
-    geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
-    labs(
-        y = "Comments Count",
-        x = "Updates Count"
-    ) +
-    theme_classic()
-```
-
-```{r}
-ggplot(df) +
-    aes(y = collected_funds, x = updates_count) +
-    geom_hline(yintercept = 1, linetype = "dashed", alpha = 0.5) +
-    geom_point(alpha = 0.5) +
-    geom_smooth(method = "lm", formula = "y ~ x", se = TRUE) +
-    labs(
-        y = "Collected funds",
-        x = "Updates Count"
-    ) +
-    theme_classic()
-```
 
 # Hypothesis 2: Social and Negative Emotion Interaction
 

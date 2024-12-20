@@ -19,6 +19,8 @@ library(mediation)
 df <- rio::import("BE603_gr_10.csv")
 ```
 
+Note that the code follows a different structure than the slides.
+To get some idea of how the code and presentation line up, check the last code block.
 ## Hypothesis 1: Community Effect (Mediation Analysis)
 
 ### Models and Bootstrap
@@ -38,7 +40,6 @@ model_bootstrap <- mediation::mediate(
 )
 stargazer::stargazer(model_T, model_M, model_Y, type = "text")
 ```
-
 ```{r}
 library(plotly)
 
@@ -133,7 +134,7 @@ ggplot(df) +
 
 ```{r, results='asis'}
 model_H3 <- lm(collected_funds ~ goal, data = df)
-stargazer::stargazer(model_H3, type = "text")
+summary(model_H3)
 ```
 
 

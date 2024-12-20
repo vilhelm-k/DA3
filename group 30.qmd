@@ -1,10 +1,11 @@
 ---
 title: "Hypothesis Testing and Mediation Analysis"
-author: "Your Name"
+author: "Vilhelm Karlin - 26012, Vilhelm Vänje - 25864, Pelle Avemo Hådell - 25989, Alma Samuelsson - 25934, Oscar Anastassov  - 26159"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
-
+Note that the code follows a different structure than the slides.
+To get some idea of how the code and presentation line up, check the last code block.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -19,8 +20,7 @@ library(mediation)
 df <- rio::import("BE603_gr_10.csv")
 ```
 
-Note that the code follows a different structure than the slides.
-To get some idea of how the code and presentation line up, check the last code block.
+
 ## Hypothesis 1: Community Effect (Mediation Analysis)
 
 ### Models and Bootstrap
